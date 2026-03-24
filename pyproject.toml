@@ -1,0 +1,100 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lilya-waf"
+dynamic = ["version"]
+description = 'Ratelimiting ASGI-WAF made with lilya.'
+readme = "README.md"
+requires-python = ">=3.12"
+license = "MIT"
+keywords = []
+authors = [
+  { name = "Alexander", email = "devkral@web.de" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "lilya>=0.25.0", "monkay>=0.5.3", "aiocache"
+]
+
+[project.optional-dependencies]
+db = ["edgy>=0.37.0"]
+admin = ["jinja2", "itsdangerous"]
+
+
+[project.urls]
+Documentation = "https://github.com/devkral/lilya-waf#readme"
+Issues = "https://github.com/devkral/lilya-waf/issues"
+Source = "https://github.com/devkral/lilya-waf"
+
+[tool.hatch.version]
+path = "lilya_waf/__init__.py"
+
+
+[tool.hatch.envs.default]
+features = ["db", "admin"]
+extra-dependencies = ["ruff", "uvicorn", "aiosqlite", "pytest"]
+
+[tool.hatch.envs.hatch-test]
+features = ["db", "admin"]
+extra-dependencies = ["faker", "aiosqlite","anyio", "httpx2"]
+
+[tool.hatch.envs.hatch-static-analysis]
+# disables custom ruff rules, required to align with pre-commit
+config-path = "none"
+dependencies = ["ruff"]
+
+[tool.hatch.envs.hatch-check-types]
+template = "default"
+config-path = "none"
+dependencies = ["ty"]
+
+[tool.hatch.envs.hatch-check-types.scripts]
+check = "ty check {args}"
+check-summarize = "ty check {args}"
+
+[tool.coverage.run]
+source_pkgs = ["lilya_waf", "tests"]
+branch = true
+parallel = true
+
+[tool.coverage.paths]
+lilya_waf = ["lilya_waf", "*/lilya-waf/lilya_waf"]
+tests = ["tests", "*/lilya-waf/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]
+[tool.pytest.ini_options]
+anyio_mode = "auto"
+
+[tool.ruff]
+line-length = 99
+fix = true
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "C", "B", "I", "UP", "SIM", "ANN"]
+ignore = ["E501", "B008", "C901", "B026", "SIM115", "E731", "ANN401"]
+exclude = ["docs_src/*", ".pdbrc"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["ANN"]
+"lilya_waf/edgy/migrations/*" = ["ANN"]
+
+[tool.ruff.lint.flake8-annotations]
+allow-star-arg-any = true
+
+[tool.ty.src]
+exclude = ["tests", "lilya_waf/edgy/migrations/versions"]
